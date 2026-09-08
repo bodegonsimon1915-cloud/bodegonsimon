@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="with-bar">
 
 <div class="announce">
   <span>🛵 Entrega a domicilio</span><i>·</i>
@@ -45,32 +45,50 @@
 <main>
   <section class="pagehead">
     <h1>🛒 Haz tu pedido</h1>
-    <p>Selecciona los productos con los botones <b>+</b>. Tu pedido se arma a la derecha y se guarda solo.</p>
+    <p><b>Paso 1:</b> haz clic en los productos que quieras y ajusta la cantidad.
+       <b>Paso 2:</b> presiona «Agregar al carrito» abajo. Después completa tus datos.</p>
   </section>
 
   <div class="builder">
+    <!-- Izquierda: filtros + productos seleccionables -->
     <div class="b-left">
       <div id="chips" class="chips"></div>
       <div id="grid" class="grid"><p class="empty">Cargando productos…</p></div>
     </div>
+
+    <!-- Derecha: resumen de la selección -->
     <aside class="b-right">
       <div class="panel summary">
         <h3 style="display:flex;justify-content:space-between;align-items:center">
-          📋 Tu pedido
-          <button id="btn-clear" class="xlink" style="font-size:.85rem">Vaciar</button>
+          ✅ Seleccionados
+          <button id="btn-clear" class="xlink" style="font-size:.85rem">Quitar todos</button>
         </h3>
-        <div id="sum-items"><p class="empty">Aún no agregas productos.<br>Toca <b>+</b> en cualquier tarjeta 👈</p></div>
-        <div class="sum-total"><span>Subtotal</span><b id="sum-subtotal">$0.00</b></div>
-        <p class="muted" style="font-size:.78rem;margin:.4rem 0 .8rem">
-          El envío (si eliges domicilio) se confirma al aprobar tu pedido.</p>
-        <a id="btn-continue" class="btn big" style="width:100%;text-align:center"
-           href="carrito.html">Continuar con mis datos →</a>
+        <div id="sum-items">
+          <p class="empty">Toca los productos de la izquierda<br>para marcarlos 👈</p>
+        </div>
+        <div class="sum-total"><span>Total a agregar</span><b id="sum-subtotal">$0.00</b></div>
+        <button id="btn-add-all" class="btn big" style="width:100%;margin-top:.6rem"
+                disabled>🛒 Agregar al carrito</button>
+        <a href="carrito.html" class="btn outline" style="width:100%;text-align:center;margin-top:.5rem">
+          Ir al carrito y finalizar →</a>
       </div>
     </aside>
   </div>
 </main>
 
-<footer class="footer">
+<!-- Barra fija de selección -->
+<div class="selbar">
+  <div class="selbar-in">
+    <div class="selbar-info">
+      <small id="bar-count">0 productos seleccionados</small>
+      <b id="bar-total">$0.00</b>
+    </div>
+    <button id="bar-clear" class="btn outline">Limpiar</button>
+    <button id="bar-add" class="btn big" disabled>🛒 Agregar al carrito</button>
+  </div>
+</div>
+
+<footer class="footer" style="margin-bottom:70px">
   <div class="f-grid">
     <div><p class="f-logo">🧺 Bodegón Simón</p><p>Tu súper de confianza, ahora online.</p></div>
     <div><h4>Atención</h4><p><a href="contacto.html">Contacto</a><br><a href="index.html">Inicio</a></p></div>
