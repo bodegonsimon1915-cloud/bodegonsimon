@@ -1,162 +1,167 @@
-"""
-Bodegón Simón — Panel Administrativo (escritorio)
-Ejecutar desde la carpeta del proyecto:   python main.py
-"""
-import os
-import sys
-import traceback
-import tkinter as tk
-from tkinter import ttk, messagebox
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bodegón Simón — Tu súper online</title>
+<meta name="description" content="Bodegón Simón: tu súper de barrio ahora online. Pide arroz, leche, aseo y más. Recoge en tienda o recíbelo a domicilio.">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
 
-# ── rutas ──
-BASE = os.path.dirname(os.path.abspath(__file__))
-os.chdir(BASE)                    # ← asegura rutas relativas correctas
-sys.path.insert(0, BASE)
+<!-- ═══════════ FRANJA UTILITARIA ═══════════ -->
+<div class="announce">
+  <span>🛵 Entrega a domicilio</span><i>·</i>
+  <span>🏪 Recoge en tienda</span><i>·</i>
+  <span>💳 Pago Móvil &amp; Transferencia</span>
+</div>
 
-# ══════════ VERIFICACIÓN DE ARCHIVOS ══════════
-REQUERIDOS = [
-    "serviceAccountKey.json",
-    "firebase_client.py",
-    "imagenes.py",
-    "whatsapp.py",
-    os.path.join("subapps", "__init__.py"),
-    os.path.join("subapps", "pedidos_app.py"),
-    os.path.join("subapps", "productos_app.py"),
-    os.path.join("subapps", "pagos_app.py"),
-    os.path.join("subapps", "config_app.py"),
-]
-FALTANTES = [f for f in REQUERIDOS if not os.path.exists(os.path.join(BASE, f))]
+<!-- ═══════════ HEADER PROFESIONAL ═══════════ -->
+<header class="header">
 
-# ══════════ IMPORTS CON ERROR CLARO ══════════
-def _importar_o_abortar():
-    errores = []
-    try:
-        import firebase_client
-    except Exception:
-        errores.append("firebase_client.py:\n" + traceback.format_exc())
-    try:
-        from subapps.pedidos_app import PedidosApp
-    except Exception:
-        PedidosApp = None
-        errores.append("subapps/pedidos_app.py:\n" + traceback.format_exc())
-    try:
-        from subapps.productos_app import ProductosApp
-    except Exception:
-        ProductosApp = None
-        errores.append("subapps/productos_app.py:\n" + traceback.format_exc())
-    try:
-        from subapps.pagos_app import PagosApp
-    except Exception:
-        PagosApp = None
-        errores.append("subapps/pagos_app.py:\n" + traceback.format_exc())
-    try:
-        from subapps.config_app import ConfigApp
-    except Exception:
-        ConfigApp = None
-        errores.append("subapps/config_app.py:\n" + traceback.format_exc())
-    return firebase_client, PedidosApp, ProductosApp, PagosApp, ConfigApp, errores
+  <!-- Nivel 1: logo + buscador + teléfono + carrito -->
+  <div class="h-main">
+    <a class="logo" href="index.html">
+      <span class="logo-ico">🧺</span>
+      <span class="logo-txt">Bodegón Simón<small>Tu súper online</small></span>
+    </a>
 
+    <form class="searchbar" action="index.html" method="get" onsubmit="return false;">
+      <span class="s-ico">🔍</span>
+      <input id="search" placeholder="Buscar arroz, leche, jabón…" autocomplete="off">
+      <select id="search-cat" title="Filtrar por pasillo">
+        <option value="todos">Todos los pasillos</option>
+      </select>
+      <button type="submit">Buscar</button>
+    </form>
 
-firebase_client, PedidosApp, ProductosApp, PagosApp, ConfigApp, ERRORES_IMPORT = _importar_o_abortar()
+    <div class="h-phone">
+      <span class="ph-ico">📞</span>
+      <div>
+        <small>Pedidos por</small>
+        <b>0414-1234567</b>
+      </div>
+    </div>
 
+    <a class="cartpill" href="carrito.html">
+      <span class="cart-ico">🛒</span>
+      <span class="cart-txt">
+        <small>Mi carrito</small>
+        <b id="cart-total">$0.00</b>
+      </span>
+      <span id="cart-count" class="badge">0</span>
+    </a>
+  </div>
 
-class BodegonSimonApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("Bodegón Simón — Panel Administrativo")
-        self.geometry("1180x700")
-        self.minsize(980, 620)
+  <!-- Nivel 2: barra verde de pasillos -->
+  <nav class="navbar">
+    <div class="navwrap">
+      <div class="dept-wrap" id="deptWrap">
+        <button class="dept-btn" id="deptBtn" type="button">☰ Todos los pasillos</button>
+        <div class="mega" id="mega">
+          <div id="megaList" class="mega-grid">
+            <p class="empty">Cargando pasillos…</p>
+          </div>
+        </div>
+      </div>
+      <a href="#ofertas-sec">🔥 Ofertas</a>
+      <a href="#como">¿Cómo funciona?</a>
+      <a href="hacer-pedido.html">🛒 Hacer pedido</a>
+      <a href="pedido.html">📦 Mi pedido</a>
+      <a href="contacto.html">💬 Contacto</a>
+    </div>
+  </nav>
+</header>
 
-        # ── avisos de arranque ──
-        problemas = []
-        if FALTANTES:
-            problemas.append("ARCHIVOS QUE FALTAN:\n• " + "\n• ".join(FALTANTES))
-        if ERRORES_IMPORT:
-            problemas.append("MÓDULOS CON ERROR:\n\n" + "\n\n".join(ERRORES_IMPORT))
-        if problemas:
-            messagebox.showwarning(
-                "Bodegón Simón — revisar instalación",
-                "\n\n".join(problemas) +
-                "\n\nLa app abrirá igual; las secciones dañadas no se podrán usar.")
+<!-- ═══════════ CONTENIDO ═══════════ -->
+<main>
 
-        # ── conectar Firebase ──
-        if not self._conectar_firebase():
-            return
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-txt">
+      <span class="hero-tag">🚀 ¡Ya estamos online!</span>
+      <h1>Tu súper de barrio, <em>ahora en tu celular</em></h1>
+      <p>Arma tu pedido, nosotros lo preparamos y te avisamos cuando esté listo
+         para recoger o llegar a tu puerta. Pagas con Pago Móvil o transferencia.</p>
+      <div class="hero-cta">
+        <a class="btn big" style="background:var(--sun);color:#3a2c00" href="#catalogo">Ver catálogo 🛒</a>
+        <a class="btn big" style="background:transparent;color:#fff;border:2px solid #ffffff88" href="hacer-pedido.html">Hacer mi pedido →</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <span>🥦</span><span>🥛</span><span>🍅</span>
+      <span>🥖</span><span>🧼</span><span>🥩</span>
+    </div>
+  </section>
 
-        self._build_ui()
-        self.show(PedidosApp if PedidosApp else ProductosApp)
+  <!-- CÓMO FUNCIONA -->
+  <h2 class="section-title" id="como">¿Cómo funciona?</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <span>1️⃣</span><b>Arma tu carrito</b>
+      <p>Elige tus productos del catálogo y envía tu pedido con tus datos.</p>
+    </div>
+    <div class="step-card">
+      <span>2️⃣</span><b>Aprobamos tu pedido</b>
+      <p>Verificamos stock y confirmamos el total (incluye envío si aplica).</p>
+    </div>
+    <div class="step-card">
+      <span>3️⃣</span><b>Paga</b>
+      <p>Pago Móvil o transferencia. Envías el número de comprobante.</p>
+    </div>
+    <div class="step-card">
+      <span>4️⃣</span><b>Recibe tu pedido</b>
+      <p>Te avisamos por WhatsApp cuando esté listo 🛵 o lo recoges 🏪.</p>
+    </div>
+  </div>
 
-    # ─────────── conexión ───────────
-    def _conectar_firebase(self):
-        try:
-            firebase_client.init()
-            self._project_label = f"🔥 Conectado: {firebase_client.project_id() or '(proyecto)'}"
-            return True
-        except Exception as e:
-            messagebox.showerror("Firebase", f"No se pudo conectar:\n\n{e}")
-            self.destroy()
-            return False
+  <!-- OFERTAS (se oculta sola si no hay productos con offerPrice) -->
+  <section id="ofertas-sec" hidden>
+    <h2 class="section-title">🔥 Ofertas de la semana</h2>
+    <div id="offers" class="shelf"></div>
+  </section>
 
-    # ─────────── interfaz ───────────
-    def _build_ui(self):
-        self.configure(bg="#f4f6f2")
+  <!-- PASILLOS -->
+  <h2 class="section-title">Pasillos del súper</h2>
+  <div id="cats" class="cats"></div>
 
-        nav = tk.Frame(self, bg="#0b2e1d", width=210)
-        nav.pack(side="left", fill="y")
-        nav.pack_propagate(False)
+  <!-- CATÁLOGO -->
+  <h2 class="section-title" id="catalogo">Productos</h2>
+  <div id="grid" class="grid">
+    <p class="empty">Cargando productos…</p>
+  </div>
 
-        tk.Label(nav, text="🧺 Bodegón Simón", bg="#0b2e1d", fg="white",
-                 font=("Segoe UI", 13, "bold")).pack(pady=(18, 2))
-        tk.Label(nav, text="Panel administrativo", bg="#0b2e1d", fg="#8fbfa3",
-                 font=("Segoe UI", 8)).pack(pady=(0, 14))
+</main>
 
-        self.nav_buttons = {}
-        # solo agregamos los botones de módulos que SÍ importaron bien
-        modulos = [("📥  Pedidos", PedidosApp),
-                   ("📦  Productos", ProductosApp),
-                   ("💳  Pagos", PagosApp),
-                   ("⚙️  Configuración", ConfigApp)]
-        for label, cls in modulos:
-            if cls is None:
-                b = tk.Button(nav, text=label + "  ⚠️", anchor="w", padx=18, pady=9,
-                              bg="#3a1f1f", fg="#ff9c8a", relief="flat", state="disabled",
-                              font=("Segoe UI", 10, "bold"))
-            else:
-                b = tk.Button(nav, text=label, anchor="w", padx=18, pady=9,
-                              bg="#0b2e1d", fg="#d7f2e2", relief="flat",
-                              activebackground="#0a5c2e", activeforeground="white",
-                              font=("Segoe UI", 10, "bold"), cursor="hand2",
-                              command=lambda c=cls: self.show(c))
-            b.pack(fill="x", pady=1)
-            self.nav_buttons[cls] = b
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+  <div class="f-grid">
+    <div>
+      <p class="f-logo">🧺 Bodegón Simón</p>
+      <p>Tu súper de confianza, ahora online. Calidad y frescura con la atención de siempre.</p>
+    </div>
+    <div>
+      <h4>Horario</h4>
+      <p>Lunes a sábado<br>8:00 am – 7:00 pm</p>
+    </div>
+    <div>
+      <h4>Formas de pago</h4>
+      <p>💳 Pago Móvil<br>🏦 Transferencia<br>💵 Efectivo al recoger</p>
+    </div>
+    <div>
+      <h4>Atención</h4>
+      <p>
+        <a href="contacto.html">Contacto y ubicación</a><br>
+        <a href="pedido.html">Estado de mi pedido</a><br>
+        <a href="hacer-pedido.html">Hacer un pedido</a>
+      </p>
+    </div>
+  </div>
+  <p class="copy">© 2025 Bodegón Simón · Hecho con 💚</p>
+</footer>
 
-        tk.Label(nav, text=self._project_label, bg="#0b2e1d", fg="#6fae87",
-                 font=("Segoe UI", 8), wraplength=180,
-                 justify="left").pack(side="bottom", pady=10, padx=8)
-
-        self.container = tk.Frame(self, bg="#f4f6f2")
-        self.container.pack(side="right", fill="both", expand=True)
-
-    def show(self, cls):
-        if cls is None:
-            messagebox.showerror("Módulo no disponible",
-                                 "Este módulo no se pudo cargar.\n"
-                                 "Revisa el aviso del inicio (archivos faltantes o errores).")
-            return
-        for c, b in self.nav_buttons.items():
-            if c is not None:
-                b.configure(bg="#0b2e1d", fg="#d7f2e2")
-        self.nav_buttons[cls].configure(bg="#0a5c2e", fg="white")
-
-        for w in self.container.winfo_children():
-            w.destroy()
-        try:
-            cls(self.container).pack(fill="both", expand=True)
-        except Exception:
-            # nada falla en silencio: mostramos el error exacto
-            messagebox.showerror("Error al cargar la sección",
-                                 traceback.format_exc())
-
-
-if __name__ == "__main__":
-    BodegonSimonApp().mainloop()
+<!-- ═══════════ SCRIPT ═══════════ -->
+<script type="module" src="js/catalog.js"></script>
+</body>
+</html>
