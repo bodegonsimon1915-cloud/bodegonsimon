@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bodegón — Tu súper online</title>
+<meta name="description" content="Bodegón: tu súper de barrio ahora online. Pide arroz, leche, aseo y más. Recoge en tienda o recíbelo a domicilio.">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ═══════════ FRANJA UTILITARIA ═══════════ -->
+<div class="announce">
+  <span>🛵 Entrega a domicilio</span><i>·</i>
+  <span>🏪 Recoge en tienda</span><i>·</i>
+  <span>💳 Pago Móvil &amp; Transferencia</span>
+</div>
+
+<!-- ═══════════ HEADER PROFESIONAL ═══════════ -->
+<header class="header">
+
+  <!-- Nivel 1: logo + buscador + teléfono + carrito -->
+  <div class="h-main">
+    <a class="logo" href="index.html">
+      <span class="logo-ico">🧺</span>
+      <span class="logo-txt">Bodegón<small>Tu súper online</small></span>
+    </a>
+
+    <form class="searchbar" action="index.html" method="get" onsubmit="return false;">
+      <span class="s-ico">🔍</span>
+      <input id="search" placeholder="Buscar arroz, leche, jabón…" autocomplete="off">
+      <select id="search-cat" title="Filtrar por pasillo">
+        <option value="todos">Todos los pasillos</option>
+      </select>
+      <button type="submit">Buscar</button>
+    </form>
+
+    <div class="h-phone">
+      <span class="ph-ico">📞</span>
+      <div>
+        <small>Pedidos por</small>
+        <b>0414-1234567</b>
+      </div>
+    </div>
+
+    <a class="cartpill" href="carrito.html">
+      <span class="cart-ico">🛒</span>
+      <span class="cart-txt">
+        <small>Mi carrito</small>
+        <b id="cart-total">$0.00</b>
+      </span>
+      <span id="cart-count" class="badge">0</span>
+    </a>
+  </div>
+
+  <!-- Nivel 2: barra verde de pasillos -->
+  <nav class="navbar">
+    <div class="navwrap">
+      <div class="dept-wrap" id="deptWrap">
+        <button class="dept-btn" id="deptBtn">☰ Todos los pasillos</button>
+        <div class="mega" id="mega">
+          <div id="megaList" class="mega-grid">
+            <p class="empty">Cargando pasillos…</p>
+          </div>
+        </div>
+      </div>
+      <a href="#ofertas-sec">🔥 Ofertas</a>
+      <a href="#como">¿Cómo funciona?</a>
+      <a href="pedido.html">📦 Mi pedido</a>
+      <a href="contacto.html">💬 Contacto</a>
+    </div>
+  </nav>
+</header>
+
+<!-- ═══════════ CONTENIDO ═══════════ -->
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-txt">
+      <span class="hero-tag">🚀 ¡Ya estamos online!</span>
+      <h1>Tu súper de barrio, <em>ahora en tu celular</em></h1>
+      <p>Arma tu pedido, nosotros lo preparamos y te avisamos cuando esté listo
+         para recoger o llegar a tu puerta. Pagas con Pago Móvil o transferencia.</p>
+      <div class="hero-cta">
+        <a class="btn big" style="background:var(--sun);color:#3a2c00" href="#catalogo">Ver catálogo 🛒</a>
+        <a class="btn outline big" style="background:transparent;color:#fff;border-color:#ffffff88" href="#como">¿Cómo funciona?</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <span>🥦</span><span>🥛</span><span>🍅</span>
+      <span>🥖</span><span>🧼</span><span>🥩</span>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <h2 class="section-title" id="como">¿Cómo funciona?</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <span>1️⃣</span><b>Arma tu carrito</b>
+      <p>Elige tus productos del catálogo y envía tu pedido con tus datos.</p>
+    </div>
+    <div class="step-card">
+      <span>2️⃣</span><b>Aprobamos tu pedido</b>
+      <p>Verificamos stock y confirmamos el total (incluye envío si aplica).</p>
+    </div>
+    <div class="step-card">
+      <span>3️⃣</span><b>Paga</b>
+      <p>Pago Móvil o transferencia. Envías el número de comprobante.</p>
+    </div>
+    <div class="step-card">
+      <span>4️⃣</span><b>Recibe tu pedido</b>
+      <p>Te avisamos por WhatsApp cuando esté listo 🛵 o lo recoges 🏪.</p>
+    </div>
+  </div>
+
+  <!-- OFERTAS (se oculta sola si no hay productos con offerPrice) -->
+  <section id="ofertas-sec" hidden>
+    <h2 class="section-title">🔥 Ofertas de la semana</h2>
+    <div id="offers" class="shelf"></div>
+  </section>
+
+  <!-- PASILLOS -->
+  <h2 class="section-title">Pasillos del súper</h2>
+  <div id="cats" class="cats"></div>
+
+  <!-- CATÁLOGO -->
+  <h2 class="section-title" id="catalogo">Productos</h2>
+  <div id="grid" class="grid">
+    <p class="empty">Cargando productos…</p>
+  </div>
+
+</main>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="footer">
+  <div class="f-grid">
+    <div>
+      <p class="f-logo">🧺 Bodegón</p>
+      <p>Tu súper de confianza, ahora online. Calidad y frescura con la atención de siempre.</p>
+    </div>
+    <div>
+      <h4>Horario</h4>
+      <p>Lunes a sábado<br>8:00 am – 7:00 pm</p>
+    </div>
+    <div>
+      <h4>Formas de pago</h4>
+      <p>💳 Pago Móvil<br>🏦 Transferencia<br>💵 Efectivo al recoger</p>
+    </div>
+    <div>
+      <h4>Atención</h4>
+      <p>
+        <a href="contacto.html">Contacto y ubicación</a><br>
+        <a href="pedido.html">Estado de mi pedido</a>
+      </p>
+    </div>
+  </div>
+  <p class="copy">© 2025 Bodegón · Hecho con 💚</p>
+</footer>
+
+<!-- ═══════════ SCRIPT ═══════════ -->
+<script type="module" src="js/catalog.js"></script>
+</body>
+</html>
