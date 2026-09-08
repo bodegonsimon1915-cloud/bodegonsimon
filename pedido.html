@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bodegón Simón — Mi pedido</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="announce">
+  <span>🛵 Entrega a domicilio</span><i>·</i>
+  <span>🏪 Recoge en tienda</span><i>·</i>
+  <span>💳 Pago Móvil &amp; Transferencia</span>
+</div>
+
+<header class="header">
+  <div class="h-main">
+    <a class="logo" href="index.html">
+      <span class="logo-ico">🧺</span>
+      <span class="logo-txt">Bodegón Simón<small>Tu súper online</small></span>
+    </a>
+    <div class="h-phone">
+      <span class="ph-ico">📞</span>
+      <div><small>Pedidos por</small><b>0414-1234567</b></div>
+    </div>
+    <a class="cartpill" href="carrito.html">
+      <span class="cart-ico">🛒</span>
+      <span class="cart-txt"><small>Mi carrito</small><b id="cart-total">$0.00</b></span>
+      <span id="cart-count" class="badge">0</span>
+    </a>
+  </div>
+  <nav class="navbar">
+    <div class="navwrap">
+      <a href="index.html">🏠 Inicio</a>
+      <a href="hacer-pedido.html">🛒 Hacer pedido</a>
+      <a href="pedido.html">📦 Mi pedido</a>
+      <a href="contacto.html">💬 Contacto</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="pagehead">
+    <h1>📦 Mi pedido</h1>
+    <p>Sigue el estado de tu pedido y paga cuando esté aprobado.</p>
+  </section>
+
+  <div id="no-order" class="panel" hidden>
+    <p class="empty">Aún no tienes ningún pedido en este navegador.<br><br>
+      <a class="btn" href="index.html">Ir al catálogo 🛒</a></p>
+  </div>
+
+  <div id="order" hidden>
+    <div id="banner"></div>
+
+    <div class="panel">
+      <h2 id="o-code"></h2>
+      <div id="timeline" class="timeline"></div>
+      <div id="o-summary"></div>
+    </div>
+
+    <div id="pay-panel" class="panel" hidden>
+      <h3>💳 Realiza tu pago</h3>
+      <p>Total a pagar: <b id="pay-total"></b></p>
+      <div id="accounts" style="margin:.8rem 0"></div>
+      <form id="pay-form">
+        <div class="field">
+          <label>Método *</label>
+          <select id="pm-method">
+            <option value="pago_movil">💳 Pago Móvil</option>
+            <option value="transferencia">🏦 Transferencia</option>
+          </select>
+        </div>
+        <div class="field"><label>Banco emisor *</label><input id="pm-bank" required></div>
+        <div class="field">
+          <label>N° de referencia / comprobante *</label>
+          <input id="pm-ref" required minlength="4">
+        </div>
+        <div class="field">
+          <label>Monto pagado *</label>
+          <input id="pm-amount" type="number" step="0.01" required>
+        </div>
+        <button class="btn big" style="width:100%">Enviar comprobante ✅</button>
+      </form>
+    </div>
+
+    <div id="pay-info" class="panel" hidden></div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="f-grid">
+    <div><p class="f-logo">🧺 Bodegón Simón</p><p>Tu súper de confianza, ahora online.</p></div>
+    <div><h4>Atención</h4><p><a href="contacto.html">Contacto</a><br><a href="index.html">Inicio</a></p></div>
+  </div>
+  <p class="copy">© 2025 Bodegón Simón · Hecho con 💚</p>
+</footer>
+
+<script type="module" src="js/order.js"></script>
+</body>
+</html>

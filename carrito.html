@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bodegón Simón — Finalizar pedido</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="announce">
+  <span>🛵 Entrega a domicilio</span><i>·</i>
+  <span>🏪 Recoge en tienda</span><i>·</i>
+  <span>💳 Pago Móvil &amp; Transferencia</span>
+</div>
+
+<header class="header">
+  <div class="h-main">
+    <a class="logo" href="index.html">
+      <span class="logo-ico">🧺</span>
+      <span class="logo-txt">Bodegón Simón<small>Tu súper online</small></span>
+    </a>
+    <div class="h-phone">
+      <span class="ph-ico">📞</span>
+      <div><small>Pedidos por</small><b>0414-1234567</b></div>
+    </div>
+    <a class="cartpill" href="carrito.html">
+      <span class="cart-ico">🛒</span>
+      <span class="cart-txt"><small>Mi carrito</small><b id="cart-total">$0.00</b></span>
+      <span id="cart-count" class="badge">0</span>
+    </a>
+  </div>
+  <nav class="navbar">
+    <div class="navwrap">
+      <a href="index.html">🏠 Inicio</a>
+      <a href="hacer-pedido.html">🛒 Hacer pedido</a>
+      <a href="pedido.html">📦 Mi pedido</a>
+      <a href="contacto.html">💬 Contacto</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="pagehead">
+    <h1>📋 Finalizar pedido</h1>
+    <p>Completa tus datos y envía. Revisamos stock y te confirmamos el total.</p>
+  </section>
+
+  <div class="checkout">
+    <div id="items" class="panel">
+      <h3 style="margin-bottom:.6rem">🛒 Tu selección</h3>
+      <div id="items-list"></div>
+      <div class="sum-total" style="margin-top:1rem">
+        <span>Subtotal</span><b id="co-subtotal">$0.00</b>
+      </div>
+      <a href="hacer-pedido.html" style="font-size:.85rem">← Seguir agregando productos</a>
+    </div>
+
+    <form id="co-form" class="panel">
+      <h3 style="margin-bottom:.8rem">✍️ Tus datos</h3>
+      <div class="field">
+        <label>Nombre completo *</label>
+        <input id="co-name" required minlength="5" placeholder="Ej: María Pérez">
+      </div>
+      <div class="field">
+        <label>Cédula *</label>
+        <input id="co-id" required inputmode="numeric" pattern="\d{5,12}"
+               title="Solo números, entre 5 y 12 dígitos" placeholder="Ej: 12345678">
+      </div>
+      <div class="field">
+        <label>Celular (WhatsApp) *</label>
+        <input id="co-phone" required inputmode="tel" placeholder="04141234567">
+      </div>
+      <div class="field">
+        <label>¿Cómo lo recibes? *</label>
+        <label style="display:block;font-weight:400;margin:.2rem 0">
+          <input type="radio" name="co-del" value="recogida" checked> 🏪 Recogida en bodega</label>
+        <label style="display:block;font-weight:400">
+          <input type="radio" name="co-del" value="domicilio"> 🛵 Entrega a domicilio</label>
+      </div>
+      <div class="field" id="addr-wrap" hidden>
+        <label>Dirección de entrega *</label>
+        <input id="co-address" placeholder="Calle, casa/apt, sector">
+      </div>
+      <div class="field">
+        <label>Fecha preferida (opcional)</label>
+        <input id="co-date" type="date">
+      </div>
+      <p class="muted" style="margin-bottom:.8rem;font-size:.8rem">
+        ✅ Tu pedido queda <b>pendiente</b>. Al aprobarlo te avisamos por WhatsApp
+        con el total final y ahí pagas.</p>
+      <button class="btn big" style="width:100%">Enviar pedido ✅</button>
+    </form>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="f-grid">
+    <div><p class="f-logo">🧺 Bodegón Simón</p><p>Tu súper de confianza, ahora online.</p></div>
+    <div><h4>Atención</h4><p><a href="contacto.html">Contacto</a><br><a href="index.html">Inicio</a></p></div>
+  </div>
+  <p class="copy">© 2025 Bodegón Simón · Hecho con 💚</p>
+</footer>
+
+<script type="module" src="js/cart.js"></script>
+</body>
+</html>
