@@ -1,7 +1,6 @@
 import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { db } from "./firebase-config.js";
-import { getCart, addToCart, setQty, removeFromCart, saveCart, cartTotals,
-         money, renderCartBadge, toast, imgSrc } from "./store.js";
+import { addToCart, money, renderCartBadge, toast, imgSrc } from "./store.js";
 
 const grid = document.getElementById("grid"),
       chipsEl = document.getElementById("chips"),
@@ -9,7 +8,11 @@ const grid = document.getElementById("grid"),
       sumItems = document.getElementById("sum-items"),
       sumSubtotal = document.getElementById("sum-subtotal"),
       btnClear = document.getElementById("btn-clear"),
-      btnContinue = document.getElementById("btn-continue");
+      btnAddAll = document.getElementById("btn-add-all"),
+      barCount = document.getElementById("bar-count"),
+      barTotal = document.getElementById("bar-total"),
+      barClear = document.getElementById("bar-clear"),
+      barAdd = document.getElementById("bar-add");
 
 const EMOJI = [["fruta","🥬"],["verdu","🥬"],["carn","🥩"],["poll","🍗"],["lact","🥛"],
   ["ques","🧀"],["pan","🥖"],["gran","🍚"],["arroz","🍚"],["enlat","🥫"],["atun","🥫"],
@@ -19,14 +22,30 @@ const emojiFor = c => { const s = (c || "").toLowerCase();
   return (EMOJI.find(([k]) => s.includes(k)) || [null, "🛍️"])[1]; };
 
 let products = [], cat = "todos", q = "";
-const eff = p => (p.offerPrice && p.offerPrice < p.price) ? p.offerPrice : p.price;
 
+/* SELECCIÓN: { productId: cantidad } — independiente del carrito */
+const sel = new Map();
+
+const eff = p => (p.offerPrice && p.offerPrice < p.price) ? p.offerPrice : p.price;
+const byId = id => products.find(p => p.id === id);
+const selCount = () => sel.size;
+const selUnits = () => [...sel.values()].reduce((a, b) => a + b, 0);
+const selTotal = () => [...sel.entries()]
+  .reduce((t, [id, qty]) => { const p = byId(id); return p ? t + eff(p) * qty : t; }, 0);
+
+/* ── Datos en vivo ── */
 onSnapshot(collection(db, "products"), snap => {
   products = snap.docs.map(d => ({ id: d.id, ...d.data() }))
     .filter(p => p.available !== false);
-  buildChips(); renderGrid(); renderSummary();
+  // limpiar selecciones de productos que ya no existen o quedaron sin stock
+  for (const id of [...sel.keys()]) {
+    const p = byId(id);
+    if (!p || p.stock <= 0) sel.delete(id);
+  }
+  buildChips(); renderGrid(); renderSel();
 }, err => { grid.innerHTML = `<p class="empty">⚠️ Error: ${err.message}</p>`; });
 
+/* ── Pasillos ── */
 function buildChips() {
   const counts = {};
   products.forEach(p => { if (p.category) counts[p.category] = (counts[p.category] || 0) + 1; });
@@ -40,26 +59,29 @@ chipsEl.addEventListener("click", e => {
   cat = b.dataset.cat; buildChips(); renderGrid();
 });
 
-const qtyInCart = id => { const r = getCart().find(i => i.productId === id); return r ? r.quantity : 0; };
-
+/* ── Tarjeta seleccionable ── */
 function cardHTML(p) {
-  const inCart = qtyInCart(p.id);
+  const E = eff(p), qty = sel.get(p.id) || 0, isSel = qty > 0;
   return `
-  <article class="card ${inCart ? "in-cart" : ""}">
+  <article class="card ${isSel ? "selected" : ""}" data-card="${p.id}">
+    <span class="sel-check">✓</span>
     ${p.offerPrice && p.offerPrice < p.price ? `<span class="tag-offer">OFERTA</span>` : ""}
     <img src="${imgSrc(p)}" alt="${p.name}">
     <h3>${p.name}</h3>
     <span class="unit">${p.unit || ""}${p.category ? " · " + p.category : ""}</span>
     <div class="row">
-      <span class="price">${money(eff(p))}</span>
+      <span class="price">${money(E)}</span>
       <span class="stock ${p.stock > 0 ? "ok" : "out"}">${p.stock > 0 ? "✓ " + p.stock : "Agotado"}</span>
     </div>
-    ${p.stock > 0 ? `
-    <div class="stepper">
-      <button data-dec="${p.id}" ${inCart ? "" : "disabled"}>−</button>
-      <span>${inCart}</span>
-      <button data-inc="${p.id}">+</button>
-    </div>` : `<button class="btn" disabled>Agotado</button>`}
+    ${p.stock > 0
+      ? (isSel
+        ? `<div class="stepper">
+             <button type="button" data-dec="${p.id}">−</button>
+             <span>${qty}</span>
+             <button type="button" data-inc="${p.id}">+</button>
+           </div>`
+        : `<button type="button" class="btn pick" data-pick="${p.id}">＋ Seleccionar</button>`)
+      : `<button class="btn" disabled>Agotado</button>`}
   </article>`;
 }
 
@@ -72,76 +94,116 @@ function renderGrid() {
     : `<p class="empty">${products.length ? "Sin resultados 🤔" : "Aún no hay productos"}</p>`;
 }
 
+/* ── Interacción del grid ── */
 grid.addEventListener("click", e => {
-  const inc = e.target.closest("[data-inc]"), dec = e.target.closest("[data-dec]");
-  if (inc) {
-    const p = products.find(x => x.id === inc.dataset.inc);
-    if (p && addToCart(p, 1)) { refresh(inc); toast(`+1 ${p.name}`); }
-  }
-  if (dec) {
-    const p = products.find(x => x.id === dec.dataset.dec);
-    const cur = qtyInCart(p.id);
-    if (cur <= 1) removeFromCart(p.id); else setQty(p.id, cur - 1);
-    refresh(dec);
+  const pick = e.target.closest("[data-pick]");
+  const inc  = e.target.closest("[data-inc]");
+  const dec  = e.target.closest("[data-dec]");
+  const card = e.target.closest("[data-card]");
+
+  // clic en steppers: no alternar selección
+  if (inc) { const id = inc.dataset.inc, p = byId(id);
+    if (p && (sel.get(id) || 0) < p.stock) sel.set(id, sel.get(id) + 1);
+    else if (p) alert(`Stock disponible: ${p.stock}`);
+    updateCard(id); renderSel(); return; }
+  if (dec) { const id = dec.dataset.dec;
+    const n = (sel.get(id) || 0) - 1;
+    n <= 0 ? sel.delete(id) : sel.set(id, n);
+    updateCard(id); renderSel(); return; }
+
+  // seleccionar / deseleccionar
+  if (card) {
+    const id = card.dataset.card, p = byId(id);
+    if (!p || p.stock <= 0) return;
+    if (sel.has(id)) { sel.delete(id); }
+    else { sel.set(id, 1); toast(`${p.name} seleccionado ✓`); }
+    updateCard(id); renderSel();
   }
 });
 
-function refresh(btn) {
-  const card = btn.closest(".card");
-  const pid = btn.dataset.inc || btn.dataset.dec;
-  const inCart = qtyInCart(pid);
-  card.classList.toggle("in-cart", inCart > 0);
-  card.querySelector(".stepper span").textContent = inCart;
-  card.querySelector("[data-dec]").disabled = inCart === 0;
-  renderSummary();
+function updateCard(id) {
+  const card = grid.querySelector(`[data-card="${id}"]`);
+  const p = byId(id);
+  if (!card || !p) return;
+  card.outerHTML = cardHTML(p);
 }
 
-function renderSummary() {
-  const cart = getCart();
-  if (!cart.length) {
-    sumItems.innerHTML = `<p class="empty">Aún no agregas productos.<br>Toca <b>+</b> en cualquier tarjeta 👈</p>`;
-    btnContinue.style.pointerEvents = "none"; btnContinue.style.opacity = ".5";
+/* ── Panel lateral + barra inferior ── */
+function renderSel() {
+  const n = selCount(), total = selTotal();
+  const disabled = n === 0;
+
+  if (!n) {
+    sumItems.innerHTML = `<p class="empty">Toca los productos de la izquierda<br>para marcarlos 👈</p>`;
   } else {
-    sumItems.innerHTML = cart.map(i => `
+    sumItems.innerHTML = [...sel.entries()].map(([id, qty]) => {
+      const p = byId(id); if (!p) return "";
+      return `
       <div class="sum-row">
-        <div class="grow"><b>${i.name}</b><br>
-          <small class="muted">${money(i.price)} × ${i.quantity}</small></div>
+        <div class="grow"><b>${p.name}</b><br>
+          <small class="muted">${money(eff(p))} × ${qty} = <b>${money(eff(p) * qty)}</b></small></div>
         <div class="qty">
-          <button data-sdec="${i.productId}">−</button><span>${i.quantity}</span>
-          <button data-sinc="${i.productId}">+</button>
+          <button data-sdec="${id}">−</button><span>${qty}</span>
+          <button data-sinc="${id}">+</button>
         </div>
-        <b>${money(i.subtotal)}</b>
-        <button class="xlink" data-sdel="${i.productId}">✕</button>
-      </div>`).join("");
-    btnContinue.style.pointerEvents = ""; btnContinue.style.opacity = "1";
+        <button class="xlink" data-sdel="${id}">✕</button>
+      </div>`;
+    }).join("");
   }
-  sumSubtotal.textContent = money(cartTotals().subtotal);
+
+  sumSubtotal.textContent = money(total);
+  barCount.textContent = n
+    ? `${n} producto${n > 1 ? "s" : ""} · ${selUnits()} unidad${selUnits() > 1 ? "es" : ""}`
+    : "0 productos seleccionados";
+  barTotal.textContent = money(total);
+  btnAddAll.disabled = disabled;
+  barAdd.disabled = disabled;
+  btnAddAll.textContent = disabled ? "🛒 Agregar al carrito"
+    : `🛒 Agregar ${selUnits()} al carrito`;
+  barAdd.textContent = btnAddAll.textContent;
   renderCartBadge();
 }
 
+/* steppers del panel lateral */
 sumItems.addEventListener("click", e => {
   const inc = e.target.closest("[data-sinc]"), dec = e.target.closest("[data-sdec]"),
         del = e.target.closest("[data-sdel]");
-  const stockOf = id => products.find(p => p.id === id)?.stock ?? 99;
-  if (inc) {
-    const r = getCart().find(i => i.productId === inc.dataset.sinc);
-    if (r && r.quantity + 1 <= stockOf(r.productId)) setQty(r.productId, r.quantity + 1);
-    else alert(`Stock disponible: ${stockOf(r.productId)}`);
-    renderGrid(); renderSummary();
-  }
-  if (dec) {
-    const r = getCart().find(i => i.productId === dec.dataset.sdec);
-    if (r.quantity <= 1) removeFromCart(r.productId); else setQty(r.productId, r.quantity - 1);
-    renderGrid(); renderSummary();
-  }
-  if (del) { removeFromCart(del.dataset.sdel); renderGrid(); renderSummary(); }
+  if (inc) { const id = inc.dataset.sinc, p = byId(id);
+    if (p && (sel.get(id) || 0) < p.stock) sel.set(id, sel.get(id) + 1);
+    else if (p) alert(`Stock disponible: ${p.stock}`); }
+  if (dec) { const id = dec.dataset.sdec;
+    const n = (sel.get(id) || 0) - 1; n <= 0 ? sel.delete(id) : sel.set(id, n); }
+  if (del) sel.delete(del.dataset.sdel);
+  renderGrid(); renderSel();
 });
 
-btnClear.onclick = () => {
-  if (getCart().length && confirm("¿Vaciar tu pedido?")) {
-    saveCart([]); renderGrid(); renderSummary();
+/* ── AGREGAR TODOS AL CARRITO ── */
+function agregarTodos() {
+  if (!selCount()) return;
+  let ok = 0, fail = [];
+  for (const [id, qty] of sel.entries()) {
+    const p = byId(id); if (!p) continue;
+    if (addToCart(p, qty)) ok++; else fail.push(p.name);
   }
-};
+  sel.clear();
+  renderGrid(); renderSel();
+  if (ok && !fail) toast(`✅ ${ok} producto${ok > 1 ? "s" : ""} agregados al carrito`);
+  if (ok && fail)  alert(`✅ ${ok} agregados.\n⚠️ Sin stock suficiente para: ${fail.join(", ")}`);
+  if (!ok && fail) alert(`⚠️ Sin stock suficiente para: ${fail.join(", ")}`);
+}
+btnAddAll.onclick = agregarTodos;
+barAdd.onclick = agregarTodos;
 
+function limpiar() {
+  if (!selCount()) return;
+  if (confirm("¿Quitar todos los productos seleccionados?")) {
+    sel.clear(); renderGrid(); renderSel();
+  }
+}
+btnClear.onclick = limpiar;
+barClear.onclick = limpiar;
+
+/* ── Búsqueda ── */
 searchInput.addEventListener("input", e => { q = e.target.value.toLowerCase(); renderGrid(); });
-renderSummary();
+
+renderSel();
